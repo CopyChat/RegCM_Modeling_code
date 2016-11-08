@@ -1,0 +1,53 @@
+#!/bin/bash - 
+#===============================================================================
+#
+#          FILE: setmodel.sh
+# 
+USAGE="setpprcm [ -n job_name] pprcm_code"
+# 
+#   DESCRIPTION:  
+# 
+#       OPTIONS: ---
+#  REQUIREMENTS: ---
+#          BUGS: ---
+#         NOTES: ---
+#        AUTHOR: Tang (Tang), chao.tang.1@gmail.com
+#  ORGANIZATION: le2p
+#       CREATED: 02/17/16 16:02:21 CET
+#      REVISION:  ---
+#===============================================================================
+
+#set -o nounset                             # Treat unset variables as an error
+shopt -s extglob 							# "shopt -u extglob" to turn it off
+source ~/Shell/functions.sh      			# TANG's shell functions.sh
+
+TEST=0;job="job_name";RADIATION=0;
+#=================================================== 
+    while getopts ":trn:" opt; do
+        case $opt in
+            t) TEST=1 ;;
+            n) job="$OPTARG" ;;
+            r) RADIATION=1 ;;
+            \?) echo $USAGE 
+        esac
+    done
+
+    shift $(($OPTIND - 1))
+#=================================================== 
+
+    echo job_name = $job
+    MODELDIR="/store/ctang/Modeling"
+    working_dir="$(pwd)"
+    TEMPLATESDIR="/home/ctang/code.ctang/templates"
+
+    pprcm_code=${1:?"Please give pprcm_code"}
+
+
+    cat $TEMPLATESDIR/pprcm.slurm | awk '{\
+        gsub(/pprcm_script90908/,"'$pprcm_code'");\
+        gsub(/working_directory90908/,"'$working_dir'");\
+        gsub(/job_name/,"'$job'");\
+        print}' \
+        > ./${pprcm_code}.slurm
+
+
